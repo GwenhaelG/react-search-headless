@@ -15,12 +15,31 @@ npm install --save react-search-headless
 ```jsx
 import React, { Component } from 'react'
 
-import MyComponent from 'react-search-headless'
-import 'react-search-headless/dist/index.css'
+import SearchBox from 'react-search-headless'
 
 class Example extends Component {
   render() {
-    return <MyComponent />
+    return (
+      <SearchBox
+        searchType='fuzzy'
+        data={dataSearch}
+        parameters={paramsSearch}
+        suggestions={true}
+        onFilter={(value) => {
+          console.log('filter')
+          //console.log('Set Filtered Data to: ' && JSON.stringify(value))
+        }}
+        onSelect={(group, value) => {
+          console.log('select')
+          /*console.log(
+              'Set Selected Item from Group: ' &&
+                group &&
+                ' is: ' &&
+                JSON.stringify(value)
+            )*/
+        }}
+      />
+    )
   }
 }
 ```
