@@ -1,7 +1,120 @@
-import React, { useState, useRef, Fragment } from 'react'
+// Import modules
+import React, { useState, useRef, useMemo } from 'react'
 import styled from 'styled-components'
 import Fuse from 'fuse.js'
 
+// Utilities
+const getProp = (object, path) => {
+  if (path.indexOf('.') === -1) {
+    return typeof object[path] === 'number'
+      ? object[path].toString()
+      : object[path]
+  } else {
+    if (object[path.split('.')[0]])
+      return getProp(object[path.split('.')[0]], path.split('.').slice(1))
+    else {
+      object[path.split('.')[0]] = {}
+      return getProp(object[path.split('.')[0]], path.split('.').slice(1))
+    }
+  }
+}
+
+/*  ---  Headless component  ---  */
+export const useSearch = () => {
+  return useMemo(
+    () => ({
+      parseQuery: (data, parameters, searchType, query) => {
+        try {
+          // Filter the data set by keys provided
+          const dataKeys = Object.keys(data)
+          let filteredData = {}
+          switch (searchType) {
+            case 'strict':
+              dataKeys.forEach((item) => {
+                // If parameters available
+                if (parameters[item]) {
+                  filteredData = {
+                    ...filteredData,
+                    [item]: data[item]
+                      .filter((dataItem) => {
+                        const testPassed = parameters[
+                          item
+                        ].searchKeys.map((searchKeyItem) =>
+                          query &&
+                          getProp(dataItem, searchKeyItem) &&
+                          getProp(dataItem, searchKeyItem)
+                            .toLowerCase()
+                            .indexOf(query.toLowerCase()) !== -1
+                            ? true
+                            : false
+                        )
+                        return testPassed.includes(true) ? true : false
+                      })
+                      .map((itemMap) => ({
+                        value: itemMap[parameters[item].idKey],
+                        name: parameters[item].renderName(itemMap),
+                        metadata: parameters[item].renderMeta(itemMap)
+                      }))
+                  }
+                }
+              })
+              break
+            case 'fuzzy':
+              dataKeys.forEach((key) => {
+                // If parameters available
+                if (parameters[key]) {
+                  const options = {
+                    includeScore: true,
+                    ignoreLocation: true,
+                    minMatchCharLength: parameters[key].minCar,
+                    shouldSort: true,
+                    keys: parameters[key].searchKeys
+                  }
+                  const fuse = new Fuse(data[key], options)
+                  const result = fuse.search(query)
+                  filteredData = {
+                    ...filteredData,
+                    [key]: result.map((itemMap) => ({
+                      value: itemMap.item[parameters[key].idKey],
+                      name: parameters[key].renderName(itemMap.item),
+                      metadata: parameters[key].renderMeta(itemMap.item)
+                    }))
+                  }
+                }
+              })
+              break
+            default:
+              break
+          }
+          return filteredData
+        } catch (err) {
+          console.error(err.message)
+        }
+      },
+      renderAll: (data, parameters) => {
+        let filteredData = {}
+        Object.keys(data).forEach((item) => {
+          if (parameters[item]) {
+            filteredData = {
+              ...filteredData,
+              [item]: data[item].map((itemMap) => ({
+                value: itemMap[parameters[item].idKey],
+                name: parameters[item].renderName(itemMap),
+                metadata: parameters[item].renderMeta(itemMap)
+              }))
+            }
+          }
+        })
+        return filteredData
+      }
+    }),
+    []
+  )
+}
+
+/*  ---  Styled example  ---  */
+
+// Styles
 const StyledSearchBox = styled.input`
   font-family: 'AT Surt SemiBold';
   background-color: white;
@@ -35,7 +148,8 @@ const StyledSearchBox = styled.input`
   }
 `
 
-const SearchBox = ({
+// Component
+export const SearchBox = ({
   data,
   parameters,
   suggestions,
@@ -47,87 +161,7 @@ const SearchBox = ({
   const [value, setValue] = useState('')
   const divRef = useRef(null)
 
-  const getProp = (object, path) => {
-    if (path.indexOf('.') === -1) {
-      return typeof object[path] === 'number'
-        ? object[path].toString()
-        : object[path]
-    } else {
-      if (object[path.split('.')[0]])
-        return getProp(object[path.split('.')[0]], path.split('.').slice(1))
-      else {
-        object[path.split('.')[0]] = {}
-        return getProp(object[path.split('.')[0]], path.split('.').slice(1))
-      }
-    }
-  }
-
-  const parseQuery = (query, dataKeys) => {
-    try {
-      let filteredData = {}
-      switch (searchType) {
-        case 'strict':
-          dataKeys.forEach((item) => {
-            // If parameters available
-            if (parameters[item]) {
-              filteredData = {
-                ...filteredData,
-                [item]: data[item]
-                  .filter((dataItem) => {
-                    const testPassed = parameters[
-                      item
-                    ].searchKeys.map((searchKeyItem) =>
-                      query &&
-                      getProp(dataItem, searchKeyItem) &&
-                      getProp(dataItem, searchKeyItem)
-                        .toLowerCase()
-                        .indexOf(query.toLowerCase()) !== -1
-                        ? true
-                        : false
-                    )
-                    return testPassed.includes(true) ? true : false
-                  })
-                  .map((itemMap) => ({
-                    value: itemMap[parameters[item].idKey],
-                    name: parameters[item].renderName(itemMap),
-                    metadata: parameters[item].renderMeta(itemMap)
-                  }))
-              }
-            }
-          })
-          break
-        case 'fuzzy':
-          dataKeys.forEach((key) => {
-            // If parameters available
-            if (parameters[key]) {
-              const options = {
-                includeScore: true,
-                ignoreLocation: true,
-                minMatchCharLength: parameters[key].minCar,
-                shouldSort: true,
-                keys: parameters[key].searchKeys
-              }
-              const fuse = new Fuse(data[key], options)
-              const result = fuse.search(query)
-              filteredData = {
-                ...filteredData,
-                [key]: result.map((itemMap) => ({
-                  value: itemMap.item[parameters[key].idKey],
-                  name: parameters[key].renderName(itemMap.item),
-                  metadata: parameters[key].renderMeta(itemMap.item)
-                }))
-              }
-            }
-          })
-          break
-        default:
-          break
-      }
-      return filteredData
-    } catch (err) {
-      console.error(err.message)
-    }
-  }
+  const { parseQuery, renderAll } = useSearch()
 
   const handleBlur = () => {
     function handleClickOutside(event) {
@@ -152,27 +186,12 @@ const SearchBox = ({
     try {
       // Set the input value
       setValue(query)
-
-      // Filter the data set by keys provided
-      const dataKeys = Object.keys(data)
-
       let filteredData = {}
 
       if (query) {
-        filteredData = parseQuery(query, dataKeys)
+        filteredData = parseQuery(data, parameters, searchType, query)
       } else {
-        dataKeys.forEach((item) => {
-          if (parameters[item]) {
-            filteredData = {
-              ...filteredData,
-              [item]: data[item].map((itemMap) => ({
-                value: itemMap[parameters[item].idKey],
-                name: parameters[item].renderName(itemMap),
-                metadata: parameters[item].renderMeta(itemMap)
-              }))
-            }
-          }
-        })
+        filteredData = renderAll(data, parameters)
       }
 
       if (suggestions && query) {
@@ -244,5 +263,3 @@ const SearchBox = ({
     </div>
   )
 }
-
-export default SearchBox

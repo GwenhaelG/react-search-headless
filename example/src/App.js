@@ -1,35 +1,33 @@
 import React from 'react'
-import SearchBox from 'react-search-headless'
+import { SearchBox } from 'react-search-headless'
+import dataSet from './data.json'
 
-// Data you want to search on
-const dataSearch = {
-  planets: [
-    { id: 1, name: 'Mercury' },
-    { id: 2, name: 'Venus' },
-    { id: 3, name: 'Earth' },
-    { id: 4, name: 'Mars' }
-  ],
-  satellites: [
-    { id: 1, name: 'Moon', planet: { name: 'Earth' } },
-    { id: 2, name: 'Deimos', planet: { name: 'Mars' } },
-    { id: 3, name: 'Phoebos', planet: { name: 'Mars' } }
-  ]
+const data = {
+  planets: dataSet.bodies.filter((item) => item.isPlanet === true),
+  satellites: dataSet.bodies
+    .filter((item) => item.isPlanet === false && item.aroundPlanet)
+    .filter((item) => item.englishName)
 }
 
 // How you are searching and rendering these data
 const paramsSearch = {
   planets: {
-    searchKeys: ['name'],
-    renderName: (item) => item.name,
+    searchKeys: ['englishName'],
+    renderName: (item) => item.englishName,
     renderMeta: (item) => item,
     minCar: 3,
     idKey: 'id'
   },
   satellites: {
-    searchKeys: ['name', 'planet.name'],
-    renderName: (item) => `${item.name}, satellite of ${item.planet.name}`,
+    searchKeys: ['englishName', 'aroundPlanet.planet'],
+    renderName: (item) =>
+      `${item.englishName}, satellite of ${
+        data.planets.filter(
+          (planet) => planet.id === item.aroundPlanet.planet
+        )[0].englishName
+      }`,
     renderMeta: (item) => {
-      const { id, planet, ...meta } = item
+      const { id, aroundPlanet, ...meta } = item
       return meta
     },
     minCar: 1,
@@ -39,18 +37,20 @@ const paramsSearch = {
 
 const App = () => {
   return (
-    <SearchBox
-      searchType='strict'
-      data={dataSearch}
-      parameters={paramsSearch}
-      suggestions={true}
-      onFilter={(value) => {
-        console.log(value)
-      }}
-      onSelect={(group, value) => {
-        console.log(group, value)
-      }}
-    />
+    <div>
+      <SearchBox
+        searchType='strict'
+        data={data}
+        parameters={paramsSearch}
+        suggestions={true}
+        onFilter={(value) => {
+          console.log(value)
+        }}
+        onSelect={(group, value) => {
+          console.log(group, value)
+        }}
+      />
+    </div>
   )
 }
 
