@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { filter, returnAll } from '../core/core'
+import { filterGrouped, returnAllGrouped } from '../core/core'
 
 // Unstyled component
 const SearchBox = ({
@@ -41,9 +41,9 @@ const SearchBox = ({
       let filteredData = {}
 
       if (query) {
-        filteredData = filter(data, parameters, searchType, query)
+        filteredData = filterGrouped(data, parameters, searchType, query)
       } else {
-        filteredData = returnAll(data, parameters)
+        filteredData = returnAllGrouped(data, parameters)
       }
 
       if (suggestions && query) {
@@ -91,19 +91,30 @@ const SearchBox = ({
             overflowY: 'scroll'
           }}
         >
-          {results.length > 0 &&
-            results.map((itemResult, indexResult) => (
-              <div
-                key={indexResult}
-                onClick={() => {
-                  onSelect(itemResult)
-                  setResults(null)
-                }}
-              >
-                <p>{itemResult.name}</p>
+          {Object.keys(results).map((item, index) => {
+            return (
+              <div key={index}>
+                <div>
+                  <h1 style={{ borderBottom: '1px solid black' }}>{item}</h1>
+                </div>
+                <div>
+                  {results[item].length > 0 &&
+                    results[item].map((itemResult, indexResult) => (
+                      <div
+                        key={indexResult}
+                        onClick={() => {
+                          onSelect(item, itemResult)
+                          setResults(null)
+                        }}
+                      >
+                        <p>{itemResult.name}</p>
+                      </div>
+                    ))}
+                  {results[item].length === 0 && <p>No results</p>}
+                </div>
               </div>
-            ))}
-          {results.length === 0 && <p>No results</p>}
+            )
+          })}
         </div>
       )}
     </div>

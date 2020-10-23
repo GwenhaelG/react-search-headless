@@ -85,7 +85,7 @@ const testObject = (query, dataItem, searchKeyItem, searchDepth) => {
             : false
           : false
       case 'array':
-        return searchDepth > 0
+        return !searchDepth || searchDepth > 0
           ? prop.value
               .map((dataItem) =>
                 testObject(
@@ -226,10 +226,10 @@ export const filterGrouped = (data, parameters, searchType, query) => {
 export const returnAll = (data, parameters) => {
   try {
     let filteredData
-    filteredData = data[item].map((itemMap) => ({
-      value: itemMap[parameters[item].idKey],
-      name: parameters[item].renderName(itemMap),
-      metadata: parameters[item].renderMeta(itemMap)
+    filteredData = data.map((itemMap) => ({
+      value: itemMap[parameters.idKey],
+      name: parameters.renderName(itemMap),
+      metadata: parameters.renderMeta(itemMap)
     }))
     return filteredData
   } catch (err) {

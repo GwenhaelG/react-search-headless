@@ -59,6 +59,16 @@ const paramsSearchFilterGrouped = {
 }
 
 // The data
+const dataSearchBox = dataSet.bodies.filter((item) => item.isPlanet === true)
+
+// How you are searching and rendering these data
+const paramsSearchBox = {
+  renderName: (item) => item.englishName,
+  renderMeta: (item) => item,
+  idKey: 'id'
+}
+
+// The data
 const dataFilterGroupedDepth = {
   planets: dataSet.bodies.filter((item) => item.isPlanet === true),
   satellites: dataSet.bodies
@@ -91,8 +101,39 @@ const paramsSearchFilterGroupedDepth = {
   }
 }
 
+// The data
+const dataSearchBoxGrouped = {
+  planets: dataSet.bodies.filter((item) => item.isPlanet === true),
+  satellites: dataSet.bodies
+    .filter((item) => item.isPlanet === false && item.aroundPlanet)
+    .filter((item) => item.englishName)
+}
+
+// How you are searching and rendering these data
+const paramsSearchBoxGrouped = {
+  planets: {
+    renderName: (item) => item.englishName,
+    renderMeta: (item) => item,
+    idKey: 'id'
+  },
+  satellites: {
+    searchDepth: 3,
+    renderName: (item) =>
+      `${item.englishName}, satellite of ${
+        dataSearchBoxGrouped.planets.filter(
+          (planet) => planet.id === item.aroundPlanet.planet
+        )[0].englishName
+      }`,
+    renderMeta: (item) => {
+      const { id, aroundPlanet, ...meta } = item
+      return meta
+    },
+    idKey: 'id'
+  }
+}
+
 const App = () => {
-  const { filter, filterGrouped } = useSearch()
+  const { filter, filterGrouped, SearchBox, SearchBoxGrouped } = useSearch()
 
   // filter example
   const [selectionFilter, setSelectionFilter] = useState('')
@@ -109,7 +150,13 @@ const App = () => {
   const [resultsFilterGroupedDepth, setResultsFilterGroupedDepth] = useState()
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div
+      style={{
+        padding: '20px',
+        backgroundColor: 'lightgrey',
+        minHeight: '100vh'
+      }}
+    >
       {/*<h2>Using the styled Search Box</h2>
       <StyledSearchBox
         version='light'
@@ -169,7 +216,13 @@ const App = () => {
         resultsFilter.map((item, index) => (
           <p key={index}>{JSON.stringify(item.metadata)}</p>
         ))}
-      <div style={{ borderBottomColor: 'black' }} />
+      <div
+        style={{
+          borderBottom: '2px solid black',
+          marginTop: '1vh',
+          marginBottom: '1vh'
+        }}
+      />
       <h2>Using the hooks + filter + depth</h2>
       <input
         placeholder='Search anything...'
@@ -185,7 +238,13 @@ const App = () => {
         resultsFilterDepth.map((item, index) => (
           <p key={index}>{JSON.stringify(item.metadata)}</p>
         ))}
-      <div style={{ borderBottomColor: 'black' }} />
+      <div
+        style={{
+          borderBottom: '2px solid black',
+          marginTop: '1vh',
+          marginBottom: '1vh'
+        }}
+      />
       <h2>Using the hooks + filterGrouped</h2>
       <select
         style={{ marginRight: '15px' }}
@@ -221,7 +280,13 @@ const App = () => {
         resultsFilterGrouped.planets[0].metadata.moons.map((item, index) => (
           <p key={index}>{JSON.stringify(item)}</p>
         ))}
-      <div style={{ borderBottomColor: 'black' }} />
+      <div
+        style={{
+          borderBottom: '2px solid black',
+          marginTop: '1vh',
+          marginBottom: '1vh'
+        }}
+      />
       <h2>Using the hooks + filterGrouped + depth</h2>
       <input
         placeholder='Search anything...'
@@ -243,6 +308,53 @@ const App = () => {
             resultsFilterGroupedDepth.satellites.length > 0) &&
           JSON.stringify(resultsFilterGroupedDepth)}
       </p>
+      <div
+        style={{
+          borderBottom: '2px solid black',
+          marginTop: '1vh',
+          marginBottom: '1vh'
+        }}
+      />
+      <h2>Using the unstyled Search Box</h2>
+      <SearchBox
+        searchType='strict'
+        data={dataSearchBox}
+        parameters={paramsSearchBox}
+        suggestions={true}
+        onFilter={(value) => {
+          console.log(value)
+        }}
+        onSelect={(group, value) => {
+          console.log(group, value)
+        }}
+      />
+      <div
+        style={{
+          borderBottom: '2px solid black',
+          marginTop: '1vh',
+          marginBottom: '1vh'
+        }}
+      />
+      <h2>Using the unstyled Grouped Search Box</h2>
+      <SearchBoxGrouped
+        searchType='strict'
+        data={dataSearchBoxGrouped}
+        parameters={paramsSearchBoxGrouped}
+        suggestions={true}
+        onFilter={(value) => {
+          console.log(value)
+        }}
+        onSelect={(group, value) => {
+          console.log(group, value)
+        }}
+      />
+      <div
+        style={{
+          borderBottom: '2px solid black',
+          marginTop: '1vh',
+          marginBottom: '1vh'
+        }}
+      />
     </div>
   )
 }
