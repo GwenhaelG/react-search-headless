@@ -25,11 +25,13 @@ This repository provides a headless search component for React, alongside some o
 
 It provides a bunch of core functions for running a search on a set of data with a host of parameters to control what is searched for, how and how it is returned. This lets you implement your search component UI exactly as you want it, and let the library take care of the search itself.
 
-You can use pretty much any type of data for the search data, the library takes care of dealing with the different type of data, nested data, arrays and arrays of objects.
+You can use pretty much any type of data for the search data, the library takes care of dealing with the different type of data, nested data, arrays and arrays of objects. 
+
+Additionally, it allows to run a search with different parameters for given entities in your data set. If you have users and teams in one dataset, you can control how a single search across the whole dataset is run differently for users and teams.
 
 If you want a quick implementation instead, you can use the SearchBox component directly, with some standard styling parameters. 
 
-<Much more to come!
+Much more to come!
   
 ## Methods & props
 
@@ -42,6 +44,8 @@ Props name | Required | Type | Description
 ------------ | ------------- | ------------- | -------------
 searchKeys | false | array | If omitted, the search will run on all keys in this object. If defined, lists the keys on which the search must be run. It allows for `.` notation, i.e.: targeting attributes lower in the object keys tree.
 searchDepth | false | number | If omitted, the search will run exhaustively through the object keys tree. Allows to define how deep in the tree you want the search to run (useful in case of massive amount of deeply nested data, to improve performance). For most cases, this can be omitted.
+minCar | false | number | If omitted, the run will run from the first letter typed. Controls when to start running the search before returning results.
+fuzzySensibility | false | number | Number between 0 and 1, 0 returning only exact matches, 1 returning everything. Controls the degree of fuzzy search sensitivity. Only use for `fuzzy` searches.
 idKey | true | string | The key to use as a unique reference for each data row returned by the search. 
 renderName | true | function | A function that takes a returned data row from the search and outputs a human-readable name. Set it to `(item) => {}` if you don't want it to return anything.
 renderMeta | true | function | A function that takes a returned data row from the search and outputs a metadata object. Set it to `(item) => {}` if you don't want it to return anything.
@@ -51,6 +55,8 @@ renderMeta | true | function | A function that takes a returned data row from th
 const paramSearch = {
 	searchKeys: ['name', 'location.address'],
 	searchDepth: 2,
+	minCar: 4,
+  	fuzzySensibility: 0.2,
 	idKey:  'id',
 	renderName: (item) =>  item.firstName && item.lastName,
 	renderMeta: (item) =>  item,

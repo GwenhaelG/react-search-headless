@@ -179,11 +179,18 @@ export const filter = (data, parameters, searchType, query) => {
             parameters.searchKeys
               ? (testPassed = parameters.searchKeys.map(
                   (searchKeyItem) =>
-                    query && testObject(query, dataItem, searchKeyItem)
+                    query &&
+                    (parameters.minCar
+                      ? query.length > parameters.minCar
+                      : true) &&
+                    testObject(query, dataItem, searchKeyItem)
                 ))
               : (testPassed = Object.keys(dataItem).map(
                   (searchKeyItem) =>
                     query &&
+                    (parameters.minCar
+                      ? query.length > parameters.minCar
+                      : true) &&
                     testObject(
                       query,
                       dataItem,
@@ -253,14 +260,18 @@ export const filter = (data, parameters, searchType, query) => {
 
 // Parse query and return filtered results as groups
 export const filterGrouped = (data, parameters, searchType, query) => {
+  console.log(data, parameters, searchType, query)
   try {
     // Filter the data set by keys provided
     const dataKeys = Object.keys(data)
+    console.log(dataKeys)
     let filteredData = {}
     switch (searchType) {
       case 'strict':
         dataKeys.forEach((item) => {
+          console.log(item)
           // If parameters available
+          console.log(parameters[item])
           if (parameters[item]) {
             filteredData = {
               ...filteredData,
@@ -270,11 +281,18 @@ export const filterGrouped = (data, parameters, searchType, query) => {
                   parameters[item].searchKeys
                     ? (testPassed = parameters[item].searchKeys.map(
                         (searchKeyItem) =>
-                          query && testObject(query, dataItem, searchKeyItem)
+                          query &&
+                          (parameters[item].minCar
+                            ? query.length > parameters[item].minCar
+                            : true) &&
+                          testObject(query, dataItem, searchKeyItem)
                       ))
                     : (testPassed = Object.keys(dataItem).map(
                         (searchKeyItem) =>
                           query &&
+                          (parameters[item].minCar
+                            ? query.length > parameters[item].minCar
+                            : true) &&
                           testObject(
                             query,
                             dataItem,
