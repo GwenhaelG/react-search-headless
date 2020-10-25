@@ -28,8 +28,6 @@ const App = () => {
 
   const [results, setResults] = useState()
 
-  console.log(parameters, results)
-
   return (
     <div
       style={{
@@ -43,7 +41,8 @@ const App = () => {
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          marginBottom: '5vh'
         }}
       >
         <div
@@ -57,7 +56,7 @@ const App = () => {
           <p>Component</p>
           <select
             style={{ marginRight: '15px' }}
-            value={parameters.searchType}
+            value={parameters.component}
             onChange={({ target: { value } }) =>
               setParameters({ ...parameters, component: value })
             }
@@ -215,7 +214,8 @@ const App = () => {
           justifyContent: 'start',
           flexWrap: 'wrap',
           overflowWrap: 'break-word',
-          wordWrap: 'break-word'
+          wordWrap: 'break-word',
+          marginTop: '5vh'
         }}
       >
         {parameters.component === 'hooks' && (
@@ -295,6 +295,9 @@ const App = () => {
                 }
               }}
             />
+            {results && results.length > 0 && (
+              <p>{`${results.length} results`}</p>
+            )}
             {parameters.dataType === 'simple' &&
               results &&
               results.length > 0 &&
@@ -339,11 +342,6 @@ const App = () => {
                   console.log(group, value)
                 }}
               />
-              {results &&
-                results.length > 0 &&
-                results.map((item, index) => (
-                  <p key={index}>{JSON.stringify(item.metadata)}</p>
-                ))}
             </div>
           )}
         {parameters.component === 'unstyled' &&

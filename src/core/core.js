@@ -24,7 +24,7 @@ const typeAndValue = (object) => {
           case '[object Null]':
             return { type: 'null', value: object }
           default:
-            return object
+            return { type: 'undefined', value: object }
         }
       default:
         return { type: 'string', value: object }
@@ -46,8 +46,7 @@ const getProp = (object, path) => {
         if (object[path.split('.')[0]])
           return getProp(object[path.split('.')[0]], path.split('.').slice(1))
         else {
-          object[path.split('.')[0]] = {}
-          return getProp(object[path.split('.')[0]], path.split('.').slice(1))
+          return typeAndValue('')
         }
       }
     }
@@ -70,7 +69,7 @@ const testObject = (query, dataItem, searchKeyItem, searchDepth) => {
           ? true
           : false
       case 'object':
-        return searchDepth > 0
+        return !searchDepth || searchDepth > 0
           ? Object.keys(prop.value)
               .map((searchKeyItem) =>
                 testObject(
@@ -129,7 +128,7 @@ const testObjectFuzzy = (
           ? true
           : false
       case 'object':
-        return searchDepth > 0
+        return !searchDepth || searchDepth > 0
           ? Object.keys(prop.value)
               .map((searchKeyItem) =>
                 testObjectFuzzy(
@@ -260,18 +259,14 @@ export const filter = (data, parameters, searchType, query) => {
 
 // Parse query and return filtered results as groups
 export const filterGrouped = (data, parameters, searchType, query) => {
-  console.log(data, parameters, searchType, query)
   try {
     // Filter the data set by keys provided
     const dataKeys = Object.keys(data)
-    console.log(dataKeys)
     let filteredData = {}
     switch (searchType) {
       case 'strict':
         dataKeys.forEach((item) => {
-          console.log(item)
           // If parameters available
-          console.log(parameters[item])
           if (parameters[item]) {
             filteredData = {
               ...filteredData,
