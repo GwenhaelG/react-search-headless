@@ -63,6 +63,8 @@ const dataSearchBox = dataSet.bodies.filter((item) => item.isPlanet === true)
 
 // How you are searching and rendering these data
 const paramsSearchBox = {
+  minCar: 4,
+  fuzzySensibility: 0.2,
   renderName: (item) => item.englishName,
   renderMeta: (item) => item,
   idKey: 'id'
@@ -112,6 +114,7 @@ const dataSearchBoxGrouped = {
 // How you are searching and rendering these data
 const paramsSearchBoxGrouped = {
   planets: {
+    fuzzySensibility: 0.4,
     renderName: (item) => item.englishName,
     renderMeta: (item) => item,
     idKey: 'id'
@@ -157,35 +160,6 @@ const App = () => {
         minHeight: '100vh'
       }}
     >
-      {/*<h2>Using the styled Search Box</h2>
-      <StyledSearchBox
-        version='light'
-        searchType='strict'
-        data={data}
-        parameters={paramsSearch}
-        suggestions={true}
-        onFilter={(value) => {
-          console.log(value)
-        }}
-        onSelect={(group, value) => {
-          console.log(group, value)
-        }}
-      />
-      <div style={{ borderBottomColor: 'black' }} />
-      <h2>Using the unstyled Search Box</h2>
-      <SearchBox
-        searchType='strict'
-        data={data}
-        parameters={paramsSearch}
-        suggestions={true}
-        onFilter={(value) => {
-          console.log(value)
-        }}
-        onSelect={(group, value) => {
-          console.log(group, value)
-        }}
-      />
-      <div style={{ borderBottomColor: 'black' }} />*/}
       <h2>Using the hooks + filter</h2>
       <select
         style={{ marginRight: '15px' }}
@@ -205,7 +179,7 @@ const App = () => {
         disabled={selectionFilter !== '' ? false : true}
         onClick={() => {
           setResultsFilter(
-            filter(dataFilter, paramsSearchFilter, 'strict', selectionFilter)
+            filter(dataFilter, paramsSearchFilter, 'fuzzy', selectionFilter)
           )
         }}
       >
@@ -229,7 +203,7 @@ const App = () => {
         style={{ marginRight: '15px' }}
         onChange={({ target: { value } }) =>
           setResultsFilterDepth(
-            filter(dataFilterDepth, paramsSearchFilterDepth, 'strict', value)
+            filter(dataFilterDepth, paramsSearchFilterDepth, 'fuzzy', value)
           )
         }
       />
@@ -317,7 +291,7 @@ const App = () => {
       />
       <h2>Using the unstyled Search Box</h2>
       <SearchBox
-        searchType='strict'
+        searchType='fuzzy'
         data={dataSearchBox}
         parameters={paramsSearchBox}
         suggestions={true}
@@ -337,7 +311,7 @@ const App = () => {
       />
       <h2>Using the unstyled Grouped Search Box</h2>
       <SearchBoxGrouped
-        searchType='strict'
+        searchType='fuzzy'
         data={dataSearchBoxGrouped}
         parameters={paramsSearchBoxGrouped}
         suggestions={true}

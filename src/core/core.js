@@ -1,5 +1,5 @@
 // Import modules
-//import Fuse from 'fuse.js'
+import Fuse from 'fuse.js'
 
 /* --  Utilities -- */
 
@@ -107,6 +107,67 @@ const testObject = (query, dataItem, searchKeyItem, searchDepth) => {
   }
 }
 
+// Test the object and return an array of true or false, one entry per object tested
+const testObjectFuzzy = (
+  query,
+  dataItem,
+  searchKeyItem,
+  searchDepth,
+  fuseOptions
+) => {
+  try {
+    const prop = getProp(dataItem, searchKeyItem)
+    switch (prop.type) {
+      case 'number':
+        return new Fuse([prop.value.toLowerCase()], fuseOptions).search(query)
+          .length !== 0
+          ? true
+          : false
+      case 'string':
+        return new Fuse([prop.value.toLowerCase()], fuseOptions).search(query)
+          .length !== 0
+          ? true
+          : false
+      case 'object':
+        return searchDepth > 0
+          ? Object.keys(prop.value)
+              .map((searchKeyItem) =>
+                testObjectFuzzy(
+                  query,
+                  prop.value,
+                  searchKeyItem,
+                  searchDepth ? searchDepth - 1 : 1,
+                  fuseOptions
+                )
+              )
+              .includes(true)
+            ? true
+            : false
+          : false
+      case 'array':
+        return !searchDepth || searchDepth > 0
+          ? prop.value
+              .map((dataItem) =>
+                testObjectFuzzy(
+                  query,
+                  dataItem,
+                  null,
+                  searchDepth ? searchDepth - 1 : 1,
+                  fuseOptions
+                )
+              )
+              .includes(true)
+            ? true
+            : false
+          : false
+      default:
+        return false
+    }
+  } catch (err) {
+    console.error(err.message)
+  }
+}
+
 export const filter = (data, parameters, searchType, query) => {
   try {
     let filteredData
@@ -138,6 +199,49 @@ export const filter = (data, parameters, searchType, query) => {
             metadata: parameters.renderMeta(itemMap)
           }))
         break
+      case 'fuzzy':
+        const options = {
+          includeScore: parameters.includeScore
+            ? parameters.includeScore
+            : false,
+          threshold: parameters.fuzzySensibility
+            ? parameters.fuzzySensibility
+            : 0.5,
+          minMatchCharLength: parameters.minCar ? parameters.minCar : 0
+        }
+        filteredData = data
+          .filter((dataItem) => {
+            let testPassed
+            parameters.searchKeys
+              ? (testPassed = parameters.searchKeys.map(
+                  (searchKeyItem) =>
+                    query &&
+                    testObjectFuzzy(
+                      query,
+                      dataItem,
+                      searchKeyItem,
+                      parameters.searchDepth,
+                      options
+                    )
+                ))
+              : (testPassed = Object.keys(dataItem).map(
+                  (searchKeyItem) =>
+                    query &&
+                    testObjectFuzzy(
+                      query,
+                      dataItem,
+                      searchKeyItem,
+                      parameters.searchDepth,
+                      options
+                    )
+                ))
+            return testPassed.includes(true) ? true : false
+          })
+          .map((itemMap) => ({
+            value: itemMap[parameters.idKey],
+            name: parameters.renderName(itemMap),
+            metadata: parameters.renderMeta(itemMap)
+          }))
       default:
         break
     }
@@ -189,30 +293,59 @@ export const filterGrouped = (data, parameters, searchType, query) => {
           }
         })
         break
-      /*case 'fuzzy':
-        dataKeys.forEach((key) => {
+      case 'fuzzy':
+        dataKeys.forEach((item) => {
+          const options = {
+            includeScore: parameters[item].includeScore
+              ? parameters[item].includeScore
+              : false,
+            threshold: parameters[item].fuzzySensibility
+              ? parameters[item].fuzzySensibility
+              : 0.5,
+            minMatchCharLength: parameters[item].minCar
+              ? parameters[item].minCar
+              : 0
+          }
           // If parameters available
-          if (parameters[key]) {
-            const options = {
-              includeScore: true,
-              ignoreLocation: true,
-              minMatchCharLength: parameters[key].minCar,
-              shouldSort: true,
-              keys: parameters[key].searchKeys
-            }
-            const fuse = new Fuse(data[key], options)
-            const result = fuse.search(query)
+          if (parameters[item]) {
             filteredData = {
               ...filteredData,
-              [key]: result.map((itemMap) => ({
-                value: itemMap.item[parameters[key].idKey],
-                name: parameters[key].renderName(itemMap.item),
-                metadata: parameters[key].renderMeta(itemMap.item)
-              }))
+              [item]: data[item]
+                .filter((dataItem) => {
+                  let testPassed
+                  parameters[item].searchKeys
+                    ? (testPassed = parameters[item].searchKeys.map(
+                        (searchKeyItem) =>
+                          query &&
+                          testObjectFuzzy(
+                            query,
+                            dataItem,
+                            searchKeyItem,
+                            options
+                          )
+                      ))
+                    : (testPassed = Object.keys(dataItem).map(
+                        (searchKeyItem) =>
+                          query &&
+                          testObjectFuzzy(
+                            query,
+                            dataItem,
+                            searchKeyItem,
+                            parameters[item].searchDepth,
+                            options
+                          )
+                      ))
+                  return testPassed.includes(true) ? true : false
+                })
+                .map((itemMap) => ({
+                  value: itemMap[parameters[item].idKey],
+                  name: parameters[item].renderName(itemMap),
+                  metadata: parameters[item].renderMeta(itemMap)
+                }))
             }
           }
         })
-        break*/
+        break
       default:
         break
     }
