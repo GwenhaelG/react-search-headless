@@ -210,7 +210,7 @@ const StyledSearchBox = ({
         onFocus={({ target: { value } }) => {
           handleChange(value)
         }}
-        placeholder={placeholder}
+        placeholder={placeholder ? placeholder : ''}
       />
       {results && suggestions && (
         <StyledSuggestions

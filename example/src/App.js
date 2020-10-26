@@ -88,13 +88,13 @@ const App = () => {
   } = useSearch()
 
   const [parameters, setParameters] = useState({
-    component: 'hooks',
-    searchType: 'strict',
-    dataType: 'simple',
+    component: 'styled',
+    searchType: 'fuzzy',
+    dataType: 'grouped',
     searchKeys: null,
     searchDepth: null,
     minCar: null,
-    fuzzySensibility: null,
+    fuzzySensibility: 0.6,
     fontSize: 18,
     height: 5,
     width: 30,

@@ -34,7 +34,7 @@ You can use pretty much any type of data for the search data, the library takes 
 
 Additionally, it allows to run a search with different parameters for given entities in your data set. If you have users and teams in one dataset, you can control how a single search across the whole dataset is run differently for users and teams.
 
-If you want a quick implementation instead, you can use the SearchBox component directly, with some standard styling parameters. 
+If you want a quick implementation instead, you can use the SearchBox and SearchBoxGrouped components directly, with some standard styling parameters, or the complete out-of-the-box StyledSearchBox and StyledSearchBoxGrouped
 
 Much more to come!
   
@@ -159,9 +159,101 @@ const MyComponent = () => {
 Props name | Required | Type | Description
 ------------ | ------------- | ------------- | -------------
 data | true | object | The data to run the search on. This can be any type of object.
-parameters | true | object of parameters prop | The parameters objects for the search, composed of one standard parameter prop object per key you want to search on. Defined how the search is done. See above for more details on object props. Example: `parameters={planets: {searchKey: ['name'], idKey: 'id', renderName: (item) => item.name, renderMeta: (item) => item}, satellites: {searchKey: ['parent'], idKey: 'id', renderName: (item) => item.name, renderMeta: (item) => item}}`
+parameters | true | object of parameters prop | The parameters objects for the search, composed of one standard parameter prop object per key you want to search on. Defines how the search is done. See above for more details on object props. Example: `parameters={planets: {searchKey: ['name'], idKey: 'id', renderName: (item) => item.name, renderMeta: (item) => item}, satellites: {searchKey: ['parent'], idKey: 'id', renderName: (item) => item.name, renderMeta: (item) => item}}`
 searchType | false | string | Can be `'strict'` or `'fuzzy'`. Strict search will look for an exact match, but non-case sensitive. Fuzzy will rely on Fuse.js to identify a list of approximate matches.
 query | true | string | The search string you are looking for. 
+
+### method: returnAll()
+
+Takes a data set, return it all:
+```jsx
+[
+	{
+		value: `idKey provided`,
+		name: `result of renderName`,
+		meta: `result of renderMeta`
+	},
+	{
+		...
+	}
+]
+```
+
+
+##### Implementation
+```jsx
+import { useSearch } from  'react-search-headless'
+
+const MyComponent = () => {
+	const { returnAll } = useSearch();
+
+	const results = returnAll(data,parameters);
+	
+	{/* Do something with results */}
+
+}
+```
+##### Props
+
+Props name | Required | Type | Description
+------------ | ------------- | ------------- | -------------
+data | true | object | The data to run the search on. This can be any type of object.
+parameters | true | object | The parameters objects for the returned results. See above for more details on object props. Only uses `idKey`, `renderName` and `renderMeta`. All other props will be ignored.
+
+### method: returnAllGrouped()
+
+Takes a data set, return it all:
+```jsx
+{
+	planets:
+	{
+		[
+			{
+				value: `idKey provided`,
+				name: `result of renderName`,
+				meta: `result of renderMeta`
+			},
+			{
+				...
+			}
+		]
+	},
+	satellites:
+	{
+		[
+			{
+				value: `idKey provided`,
+				name: `result of renderName`,
+				meta: `result of renderMeta`
+			},
+			{
+				...
+			}
+		]
+	},
+}
+```
+
+
+##### Implementation
+```jsx
+import { useSearch } from  'react-search-headless'
+
+const MyComponent = () => {
+	const { returnAllGrouped } = useSearch();
+
+	const results = returnAllGrouped(data,parameters);
+	
+	{/* Do something with results */}
+
+}
+```
+##### Props
+
+Props name | Required | Type | Description
+------------ | ------------- | ------------- | -------------
+data | true | object | The data to run the search on. This can be any type of object.
+parameters | true | object of parameters prop | The parameters objects for the search, composed of one standard parameter prop object per key you want to search on. See above for more details on object props. Only uses `idKey`, `renderName` and `renderMeta`. All other props will be ignored.
 
 ## Components
 
@@ -240,6 +332,103 @@ searchType | false | string | Can be `'strict'` or `'fuzzy'`. Strict search will
 suggestions | true | boolean | Whether the search box displays a list of suggestions when returning a result.
 onFilter | true | function | Callback executed whenever a search is conducted.
 onSelect | true | function | Callback executed whenever an element is selected in the list of suggestions.
+
+### component: StyledSearchBox
+
+Fully-styled search box that includes a suggestions list.
+
+##### Implementation
+```jsx
+import { useSearch } from  'react-search-headless'
+
+const MyComponent = () => {
+	const { StyledSearchBox } = useSearch();
+	
+	return(
+		<StyledSearchBox
+			data={dataSearchBox}
+			parameters={paramsSearchBox}
+			searchType='strict'
+			suggestions={true}
+			variant={variant}
+			fontSize={fontSize}
+			height={height}
+			width={width}
+			placeholder={placeholder}
+			onFilter={(value) => {
+				console.log(value)
+			}}
+			onSelect={(group, value) => {
+				console.log(group, value)
+			}}
+		/>
+	)
+}
+```
+##### Props
+
+Props name | Required | Type | Description
+------------ | ------------- | ------------- | -------------
+data | true | array | The data to run the search on. This can be any type of array, including an array of objects.
+parameters | true | object | The parameters objects for the search. Defines how the search is done. See above for more details on object props.
+searchType | false | string | Can be `'strict'` or `'fuzzy'`. Strict search will look for an exact match, but non-case sensitive. Fuzzy will rely on Fuse.js to identify a list of approximate matches.
+suggestions | true | boolean | Whether the search box displays a list of suggestions when returning a result.
+onFilter | true | function | Callback executed whenever a search is conducted.
+onSelect | true | function | Callback executed whenever an element is selected in the list of suggestions.
+variant | false | string | One of `light` or `dark`. Changes the overall style to dark or light mode. By default, `light`.
+height | false | number | Search box height in `vh`. By default, `auto`.
+width | false | number | Search box width in `vw`. By default, `auto`.
+fontSize | false | number | Font size in `px`. By default, `auto`.
+placeholder | false | string | Search box placeholder text. By default, empty.
+
+
+### component: StyledSearchBoxGrouped
+
+Fully-styled search box using grouped data and that includes a suggestions list.
+
+##### Implementation
+```jsx
+import { useSearch } from  'react-search-headless'
+
+const MyComponent = () => {
+	const { StyledSearchBoxGrouped } = useSearch();
+	
+	return(
+		<StyledSearchBoxGrouped
+			data={dataSearchBoxGrouped}
+			parameters={paramsSearchBoxGrouped}
+			searchType='strict'
+			suggestions={true}
+			variant={variant}
+			fontSize={fontSize}
+			height={height}
+			width={width}
+			placeholder={placeholder}
+			onFilter={(value) => {
+				console.log(value)
+			}}
+			onSelect={(group, value) => {
+				console.log(group, value)
+			}}
+		/>
+	)
+}
+```
+##### Props
+
+Props name | Required | Type | Description
+------------ | ------------- | ------------- | -------------
+data | true | object | The data to run the search on. This can be any type of object.
+parameters | true | object of parameters prop | The parameters objects for the search, composed of one standard parameter prop object per key you want to search on. Defined how the search is done. See above for more details on object props. Example: `parameters={planets: {searchKey: ['name'], idKey: 'id', renderName: (item) => item.name, renderMeta: (item) => item}, satellites: {searchKey: ['parent'], idKey: 'id', renderName: (item) => item.name, renderMeta: (item) => item}}`
+searchType | false | string | Can be `'strict'` or `'fuzzy'`. Strict search will look for an exact match, but non-case sensitive. Fuzzy will rely on Fuse.js to identify a list of approximate matches.
+suggestions | true | boolean | Whether the search box displays a list of suggestions when returning a result.
+onFilter | true | function | Callback executed whenever a search is conducted.
+onSelect | true | function | Callback executed whenever an element is selected in the list of suggestions.
+variant | false | string | One of `light` or `dark`. Changes the overall style to dark or light mode. By default, `light`.
+height | false | number | Search box height in `vh`. By default, `auto`.
+width | false | number | Search box width in `vw`. By default, `auto`.
+fontSize | false | number | Font size in `px`. By default, `auto`.
+placeholder | false | string | Search box placeholder text. By default, empty.
 
 ## Usage
 
