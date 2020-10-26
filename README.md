@@ -19,6 +19,11 @@ npm install --save react-search-headless
 
 ```
 
+## Example
+
+[Live example](https://gwenhaelg.github.io/react-search-headless/)
+
+
 ## Purpose
 
 This repository provides a headless search component for React, alongside some out-of-the-box implementations of it.
@@ -56,7 +61,7 @@ const paramSearch = {
 	searchKeys: ['name', 'location.address'],
 	searchDepth: 2,
 	minCar: 4,
-  	fuzzySensibility: 0.2,
+	fuzzySensibility: 0.2,
 	idKey:  'id',
 	renderName: (item) =>  item.firstName && item.lastName,
 	renderMeta: (item) =>  item,
@@ -406,7 +411,7 @@ const  MyComponent = () => {
 
 ```
 
-  ## Dependencies
+## Dependencies
   
 This repository relies on the brilliant library [Fuse.js](https://github.com/krisk/fuse) for the fuzzy-search logic.
 

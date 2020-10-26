@@ -14,7 +14,13 @@ const dataGrouped = {
 }
 
 const App = () => {
-  const { filter, filterGrouped, SearchBox, SearchBoxGrouped } = useSearch()
+  const {
+    filter,
+    filterGrouped,
+    SearchBox,
+    SearchBoxGrouped,
+    StyledSearchBox
+  } = useSearch()
 
   const [parameters, setParameters] = useState({
     component: 'hooks',
@@ -23,7 +29,11 @@ const App = () => {
     searchKeys: null,
     searchDepth: null,
     minCar: null,
-    fuzzySensibility: null
+    fuzzySensibility: null,
+    fontSize: 18,
+    height: 5,
+    width: 30,
+    variant: 'light'
   })
 
   const [results, setResults] = useState()
@@ -63,6 +73,7 @@ const App = () => {
           >
             <option value='hooks'>Hooks</option>
             <option value='unstyled'>Unstyled Searchbox</option>
+            <option value='styled'>Styled Searchbox</option>
           </select>
         </div>
         <div
@@ -199,6 +210,103 @@ const App = () => {
             }
           />
         </div>
+        {parameters.component === 'styled' && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              margin: '5px'
+            }}
+          >
+            <p>Variant</p>
+            <select
+              style={{ marginRight: '15px' }}
+              value={parameters.variant ? parameters.variant : 'light'}
+              onChange={({ target: { value } }) =>
+                setParameters({
+                  ...parameters,
+                  variant: value === '' ? 'light' : value
+                })
+              }
+            >
+              <option value='light'>Light</option>
+              <option value='dark'>Dark</option>
+            </select>
+          </div>
+        )}
+        {parameters.component === 'styled' && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              margin: '5px'
+            }}
+          >
+            <p>Font Size (in px)</p>
+            <input
+              style={{ marginRight: '15px' }}
+              value={parameters.fontSize ? parameters.fontSize : 9}
+              min='9'
+              type='number'
+              onChange={({ target: { value } }) =>
+                setParameters({
+                  ...parameters,
+                  fontSize: value === '' ? 9 : value
+                })
+              }
+            />
+          </div>
+        )}
+        {parameters.component === 'styled' && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              margin: '5px'
+            }}
+          >
+            <p>Box Height (in vh)</p>
+            <input
+              style={{ marginRight: '15px' }}
+              value={parameters.height ? parameters.height : 5}
+              min='5'
+              type='number'
+              onChange={({ target: { value } }) =>
+                setParameters({
+                  ...parameters,
+                  height: value === '' ? 5 : value
+                })
+              }
+            />
+          </div>
+        )}
+        {parameters.component === 'styled' && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              margin: '5px'
+            }}
+          >
+            <p>Box Width (in vw)</p>
+            <input
+              style={{ marginRight: '15px' }}
+              value={parameters.width ? parameters.width : 5}
+              min='5'
+              type='number'
+              onChange={({ target: { value } }) =>
+                setParameters({
+                  ...parameters,
+                  width: value === '' ? 5 : value
+                })
+              }
+            />
+          </div>
+        )}
       </div>
       <div
         style={{
@@ -394,6 +502,41 @@ const App = () => {
               />
             </div>
           )}
+        {parameters.component === 'styled' && parameters.dataType === 'simple' && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flexWrap: 'wrap'
+            }}
+          >
+            <StyledSearchBox
+              searchType={parameters.searchType}
+              data={data}
+              parameters={{
+                searchKeys: parameters.searchKeys,
+                searchDepth: parameters.searchDepth,
+                minCar: parameters.minCar,
+                fuzzySensibility: parameters.fuzzySensibility,
+                renderName: (item) => item.englishName,
+                renderMeta: (item) => item,
+                idKey: 'id'
+              }}
+              suggestions={true}
+              onFilter={(value) => {
+                console.log(value)
+              }}
+              onSelect={(group, value) => {
+                console.log(group, value)
+              }}
+              placeholder='Search anything...'
+              variant={parameters.variant}
+              height={parameters.height}
+              width={parameters.width}
+              fontSize={parameters.fontSize}
+            />
+          </div>
+        )}
       </div>
     </div>
   )
