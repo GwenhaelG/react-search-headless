@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSearch } from 'react-search-headless'
 import dataSet from './data.json'
 import styled from 'styled-components'
@@ -103,6 +103,10 @@ const App = () => {
   })
 
   const [results, setResults] = useState()
+
+  useEffect(() => {
+    setResults(null)
+  }, [parameters])
 
   return (
     <div
@@ -440,13 +444,16 @@ const App = () => {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
             margin: '5vh',
             flexGrow: 2,
             wordBreak: 'break-all',
             alignItems: 'center'
           }}
         >
+          <p style={{ wordBreak: 'normal', color: 'darkgrey' }}>
+            Dataset: all planets and satellites in solar system. Try typing
+            'Mars' or 'Ganymede' for example
+          </p>
           {parameters.component === 'hooks' && (
             <div
               style={{
@@ -457,7 +464,7 @@ const App = () => {
             >
               <input
                 placeholder='Search anything...'
-                style={{ marginRight: '15px' }}
+                style={{ marginRight: '15px', alignSelf: 'center' }}
                 onChange={({ target: { value } }) => {
                   switch (parameters.dataType) {
                     case 'simple':
@@ -535,11 +542,17 @@ const App = () => {
                 ))}
               {parameters.dataType === 'grouped' &&
                 results &&
-                results.planets.length > 0 &&
-                results.planets[0].metadata.moons.length > 0 &&
-                results.planets[0].metadata.moons.map((item, index) => (
-                  <p key={index}>{JSON.stringify(item)}</p>
-                ))}
+                Object.keys(results).map(
+                  (itemKey, indexKey) =>
+                    results[itemKey].length > 0 && (
+                      <div key={indexKey}>
+                        <h2>{itemKey}</h2>
+                        {results[itemKey].map((item, index) => (
+                          <p key={index}>{JSON.stringify(item)}</p>
+                        ))}
+                      </div>
+                    )
+                )}
             </div>
           )}
           {parameters.component === 'unstyled' &&
@@ -548,7 +561,8 @@ const App = () => {
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  flexWrap: 'wrap'
+                  flexWrap: 'wrap',
+                  alignSelf: 'center'
                 }}
               >
                 <SearchBox
@@ -579,7 +593,8 @@ const App = () => {
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  flexWrap: 'wrap'
+                  flexWrap: 'wrap',
+                  alignSelf: 'center'
                 }}
               >
                 <SearchBoxGrouped
@@ -629,12 +644,14 @@ const App = () => {
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  flexWrap: 'wrap'
+                  flexWrap: 'wrap',
+                  alignSelf: 'center'
                 }}
               >
                 <StyledSearchBox
                   searchType={parameters.searchType}
                   data={data}
+                  style={{ alignSelf: 'center' }}
                   parameters={{
                     searchKeys: parameters.searchKeys,
                     searchDepth: parameters.searchDepth,
@@ -668,7 +685,7 @@ const App = () => {
                   }}
                 >
                   {!parameters.suggestions &&
-                    (!results || results.length === 0) &&
+                    !results &&
                     returnAll(data, {
                       searchKeys: parameters.searchKeys,
                       searchDepth: parameters.searchDepth,
@@ -691,6 +708,7 @@ const App = () => {
                     ))}
                   {!parameters.suggestions &&
                     results &&
+                    !results.planets &&
                     results.length !== 0 &&
                     results.map((itemResult, indexResult) => (
                       <StyledSuggestion
@@ -713,12 +731,14 @@ const App = () => {
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  flexWrap: 'wrap'
+                  flexWrap: 'wrap',
+                  alignSelf: 'center'
                 }}
               >
                 <StyledSearchBoxGrouped
                   searchType={parameters.searchType}
                   data={dataGrouped}
+                  style={{ alignSelf: 'center' }}
                   parameters={{
                     planets: {
                       searchKeys: parameters.searchKeys,
@@ -772,10 +792,8 @@ const App = () => {
                 >
                   {!parameters.suggestions &&
                     results &&
-                    (results.planets.length !== 0 ||
-                      results.satellites.length !== 0) &&
                     Object.keys(results).map(
-                      (itemResult, indexResult) =>
+                      (itemResult) =>
                         results[itemResult].length > 0 &&
                         results[itemResult].map((item, index) => (
                           <StyledSuggestion
